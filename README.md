@@ -9,7 +9,7 @@ This package implements the [libdns interfaces](https://github.com/libdns/libdns
 
 The provider expects the following configuration:
 
-- APIKey - a regfish API key (from Account, Security, API keys)
+- APIToken - a regfish API key (from Account, Security, API keys)
 
 # Notes
 
