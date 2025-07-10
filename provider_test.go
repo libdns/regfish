@@ -2,6 +2,7 @@ package regfish_test
 
 import (
 	"context"
+	"net/netip"
 	"testing"
 	"time"
 
@@ -33,7 +34,7 @@ func TestProviderFunction(t *testing.T) {
 		assert.NotNil(t, result)
 	})
 
-	records := []libdns.Record{{Name: test_name, Type: "A", Value: "10.250.1.1", TTL: time.Duration(60) * time.Second}}
+	records := []libdns.Record{libdns.Address{Name: test_name, IP: netip.MustParseAddr("10.250.1.1"), TTL: time.Duration(60) * time.Second}}
 
 	t.Run("Testing AppendRecords", func(t *testing.T) {
 		result, err := provider.AppendRecords(context.Background(), test_zone, records)
@@ -41,7 +42,7 @@ func TestProviderFunction(t *testing.T) {
 		assert.NotNil(t, result)
 	})
 
-	records = []libdns.Record{{Name: test_name, Type: "A", Value: "10.250.2.2", TTL: time.Duration(120) * time.Second}}
+	records = []libdns.Record{libdns.Address{Name: test_name, IP: netip.MustParseAddr("10.250.2.2"), TTL: time.Duration(120) * time.Second}}
 
 	t.Run("Testing SetRecords", func(t *testing.T) {
 		result, err := provider.SetRecords(context.Background(), test_zone, records)

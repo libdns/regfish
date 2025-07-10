@@ -2,7 +2,6 @@ package regfish
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/libdns/libdns"
@@ -34,16 +33,31 @@ func (p *Provider) upsertRecord(record libdns.Record, zone string) (*rfns.Record
 		return nil, err
 	}
 
+	rr := record.RR()
+
 	update_rec := rfns.Record{
-		Name:     p.fqdn(record.Name, zone),
-		Type:     record.Type,
-		Data:     record.Value,
-		TTL:      int(record.TTL.Seconds()),
-		Priority: &record.Priority,
+		Name: p.fqdn(rr.Name, zone),
+		Type: rr.Type,
+		Data: rr.Data,
+		TTL:  int(rr.TTL.Seconds()),
+		//Priority: &record.Priority,
+	}
+
+	switch rec := record.(type) {
+	case libdns.SRV:
+	case libdns.ServiceBinding:
+		priority := int(rec.Priority)
+		update_rec.Priority = &priority
+	case libdns.MX:
+		pref := int(rec.Preference)
+		update_rec.Priority = &pref
 	}
 
 	for _, rec := range records {
-		if fmt.Sprintf("%d", rec.ID) == record.ID || (p.fqdn(rec.Name, zone) == p.fqdn(record.Name, zone) && rec.Type == record.Type) {
+		// libdns.Record no longer provides the ID field..
+		// So we need to compare the FQDN and Type to find the record.
+		// This will fail if there are multiple records with the same FQDN and Type.
+		if p.fqdn(rec.Name, zone) == p.fqdn(rr.Name, zone) && rec.Type == rr.Type {
 			updatedRecord, err := p.client.UpdateRecordById(rec.ID, update_rec)
 			return &updatedRecord, err
 		}
